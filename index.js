@@ -4,7 +4,7 @@ const ctx = canvas.getContext('2d');
 ctx.fillStyle = "#000000";
 ctx.strokeStyle = "#0000ff";
 
-const gridBlock = 100;
+const gridCell = 100;
 
 class Vector{
     constructor(x, y){
@@ -22,8 +22,10 @@ class Vector{
 
     normalize(){
         let mag = this.mag();
-        this.x /= mag;
-        this.y /= mag;
+        if(mag !== 0){
+            this.x /= mag;
+            this.y /= mag;
+        }
     }
 }
 
@@ -31,38 +33,46 @@ const grid = [];
 for(let i = 0; i < 8; i++){
     grid[i] = new Array();
     for(let j = 0; j < 8; j++){
-        grid[i][j] = new Vector(Math.random() * 20 - 10, Math.random() * 20 - 10);
+        grid[i][j] = new Vector(Math.random() * 2 - 1, Math.random() * 2 - 1);
         grid[i][j].normalize();
     }
 }
 
-function drawBlock(ctx, imageData, offsetX, offsetY){
-    for(let i = 0; i < imageData.data.length; i+=4){
+function smoothstep(x){
+    return 3*x*x - 2*x*x*x;
+}
+
+function lerp(a, b, t){
+    return a + t * (b - a);
+}
+
+function drawCell(ctx, imageData, offsetX, offsetY){
+    for(let i = 0; i < imageData.data.length; i += 4){
         const pixelCount = Math.floor(i / 4);
-        const x = Math.floor(pixelCount % 100.0);
-        const y = Math.floor(pixelCount / 100.0);
-        const vector = new Vector(x, y);
+        const x = pixelCount % gridCell;
+        const y = Math.floor(pixelCount / gridCell);
 
-        let gridX = 1, gridY = 1;
-        if(x < 50)
-            gridX = 0;
-        else
-            vector.x = -(100 - vector.x);
-        if(y < 50)
-            gridY = 0;
+        const relX = x / gridCell;
+        const relY = y / gridCell;
+        const vector1 = new Vector(relX, relY);
+        const vector2 = new Vector(relX - 1, relY);
+        const vector3 = new Vector(relX - 1, relY - 1);
+        const vector4 = new Vector(relX, relY - 1);
+
+        let gridY = Math.floor((offsetY - gridCell) / gridCell);
+        let gridX = Math.floor((offsetX - gridCell) / gridCell);
+        const dot1 = vector1.dot(grid[gridY][gridX]);
+        const dot2 = vector2.dot(grid[gridY][gridX + 1]);
+        const dot3 = vector3.dot(grid[gridY + 1][gridX + 1]);
+        const dot4 = vector4.dot(grid[gridY + 1][gridX]);
+        const ab = lerp(dot1, dot2, smoothstep(vector1.x));
+        const cd = lerp(dot4, dot3, smoothstep(vector1.x));
+        const result = lerp(ab, cd, smoothstep(vector1.y));
+
+        if(result >= 0)
+            imageData.data[i+1] = 255 * result;
         else{
-            vector.y = -(100 - vector.y);
-        }
-        vector.normalize();
-
-        gridY += Math.floor((offsetY - 100) / 100);
-        gridX += Math.floor((offsetX - 100) / 100);
-
-        const scalar = vector.dot(grid[gridY][gridX]);
-        if(scalar >= 0)
-            imageData.data[i+1] = 255 * scalar;
-        else{
-            imageData.data[i] = -255 * scalar;
+            imageData.data[i] = -255 * result;
         }
 
         imageData.data[i+2] = 0;
@@ -71,27 +81,26 @@ function drawBlock(ctx, imageData, offsetX, offsetY){
     ctx.putImageData(imageData, offsetX, offsetY);
 }
 
-
-let offsetY = 100;
+let offsetY = gridCell;
 for(let i = 0; i < grid.length - 1; i++){
-    let offsetX = 100;
+    let offsetX = gridCell;
     for(let j = 0; j < grid.length - 1; j++){
-        const imageData = ctx.createImageData(100, 100);
-        drawBlock(ctx, imageData, offsetX, offsetY);
-        offsetX += 101;
+        const imageData = ctx.createImageData(gridCell, gridCell);
+        drawCell(ctx, imageData, offsetX, offsetY);
+        offsetX += gridCell + 1;
     }
-    offsetY += 101;
+    offsetY += gridCell + 1;
 }
 
-let y = 100;
+let y = gridCell;
 for(let i = 0; i < grid.length; i++){
-    x = 100
+    x = gridCell
     for(let j = 0; j < grid[i].length; j++){
         ctx.beginPath();
         ctx.moveTo(x, y);
-        ctx.lineTo(x + (grid[i][j].x * (gridBlock/2)), y + (grid[i][j].y * (gridBlock/2)));
+        ctx.lineTo(x + (grid[i][j].x * (gridCell/2)), y + (grid[i][j].y * (gridCell/2)));
         ctx.stroke();
         x += 101;
     }
-    y += 101;
+    y += gridCell + 1;
 }
