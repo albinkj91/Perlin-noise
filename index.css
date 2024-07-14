@@ -1,13 +1,9 @@
 body{
-    background-color: #202020;
+    background-color: #101010;
 }
 
 #content{
-    margin: auto;
     display: flex;
-    width: 900px;
-    height: 900px;
-    align-self: center;
-    justify-self: center;
-    background-color: #404040;
+    align-items: center;
+    justify-content: center;
 }
