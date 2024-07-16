@@ -1,20 +1,20 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <title>WebGL Demo</title>
-    <link rel="stylesheet" href="terrain.css">
-    <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/gl-matrix/2.8.1/gl-matrix-min.js"
-      integrity="sha512-zhHQR0/H5SEBL3Wn6yYSaTTZej12z0hVZKOv3TwCUXT1z5qeqGcXJLLrbERYRScEDDpYIJhPC1fk31gqR783iQ=="
-      crossorigin="anonymous"
-      defer
-    ></script>
-  </head>
-  <body>
-    <div id="content">
-      <canvas id="glcanvas" width="1200" height="800"></canvas>
-    </div>
-    <script src="terrain.js" type="module"></script>
-  </body>
+
+<head>
+	<meta charset="utf-8" />
+	<title>Terrain generation</title>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/gl-matrix/2.8.1/gl-matrix-min.js"
+		integrity="sha512-zhHQR0/H5SEBL3Wn6yYSaTTZej12z0hVZKOv3TwCUXT1z5qeqGcXJLLrbERYRScEDDpYIJhPC1fk31gqR783iQ=="
+		crossorigin="anonymous" defer></script>
+	<script defer src="terrain.js" type="module"></script>
+	<link rel="stylesheet" href="terrain.css">
+	<link type="image/xicon" rel="icon"
+		href="https://icon-library.com/images/small-icon-images/small-icon-images-4.jpg">
+</head>
+
+<body>
+	<canvas id="canvas" width="1200" height="900"></canvas>
+</body>
+
 </html>
