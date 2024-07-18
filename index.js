@@ -3,7 +3,7 @@ const ctx = canvas.getContext('2d');
 
 ctx.strokeStyle = "#0000ff";
 
-const gridSize = 32;
+const gridSize = 8;
 const cellWidth = Math.floor(canvas.width / gridSize);
 const grid = [];
 
@@ -128,14 +128,14 @@ function rotateGradientVectors(phi) {
 	grid.forEach(row => row.forEach(element => element.rotate(element.angle() + phi)));
 }
 
-const angle = 0.05;
-function step() {
-	rotateGradientVectors(angle);
-	ctx.clearRect(0, 0, 900, 900);
-	render();
-	window.requestAnimationFrame(step);
-}
+//const angle = 0.05;
+//function step() {
+//	rotateGradientVectors(angle);
+//	ctx.clearRect(0, 0, 900, 900);
+//	render();
+//	window.requestAnimationFrame(step);
+//}
 
 randomizeGradientVectors(grid, gridSize);
 render();
-requestAnimationFrame(step);
+//requestAnimationFrame(step);
