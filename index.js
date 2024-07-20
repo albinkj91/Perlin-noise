@@ -1,11 +1,13 @@
 const canvas = document.querySelector('#canvas');
 const ctx = canvas.getContext('2d');
 
-ctx.strokeStyle = "#0000ff";
-
-const gridSize = 8;
-const cellWidth = Math.floor(canvas.width / gridSize);
+const width = 100;
+const gridSize = 10;
+const cellWidth = Math.floor(width / gridSize);
 const grid = [];
+
+canvas.width = cellWidth * (gridSize-1);
+canvas.height = cellWidth * (gridSize-1);
 
 class Vector {
 	constructor(x, y) {
@@ -58,11 +60,11 @@ function lerp(a, b, t) {
 	return a + t * (b - a);
 }
 
-function drawCell(ctx, imageData, offsetX, offsetY) {
-	for (let i = 0; i < imageData.data.length; i += 4) {
-		const pixelCount = Math.floor(i / 4);
-		const x = pixelCount % cellWidth;
-		const y = Math.floor(pixelCount / cellWidth);
+function calcCell(offsetX, offsetY) {
+	let cellData = new Float32Array(cellWidth*cellWidth);
+	for (let i = 0; i < cellWidth*cellWidth; i++) {
+		const x = i % cellWidth;
+		const y = Math.floor(i / cellWidth);
 
 		const relX = x / cellWidth;
 		const relY = y / cellWidth;
@@ -84,58 +86,54 @@ function drawCell(ctx, imageData, offsetX, offsetY) {
 		const cd = lerp(dot4, dot3, smoothstep(vector1.x));
 		const result = lerp(ab, cd, smoothstep(vector1.y));
 
-		if (result >= 0)
-			imageData.data[i] = 255 * result;
-		else {
-			imageData.data[i + 1] = -255 * result;
-		}
-
-		imageData.data[i + 2] = 20;
-		imageData.data[i + 3] = 255;
+		//const brightness = result * 255;
+		//ctx.fillStyle = `rgb(${brightness}, ${brightness}, ${brightness})`;
+		//ctx.fillRect(offsetX + x, offsetY + y, 1, 1)
+		cellData[i] = result;
 	}
-	ctx.putImageData(imageData, offsetX, offsetY);
+	return cellData;
 }
 
-function drawGradientVectors() {
-	let y = 0;
-	for (let i = 0; i < grid.length; i++) {
-		let x = 0
-		for (let j = 0; j < grid[i].length; j++) {
-			ctx.beginPath();
-			ctx.moveTo(x, y);
-			ctx.lineTo(x + (grid[i][j].x * (cellWidth / 2)), y + (grid[i][j].y * (cellWidth / 2)));
-			ctx.stroke();
-			x += cellWidth;
-		}
-		y += cellWidth;
-	}
-}
-
-function render() {
+function perlin() {
+	let imageData = [];
 	let offsetY = 0;
-	for (let i = 0; i < grid.length - 1; i++) {
+	for (let i = 0; i < gridSize - 1; i++) {
 		let offsetX = 0;
-		for (let j = 0; j < grid.length - 1; j++) {
-			const imageData = ctx.createImageData(cellWidth, cellWidth);
-			drawCell(ctx, imageData, offsetX, offsetY);
+		imageData[i] = new Array();
+		for (let j = 0; j < gridSize - 1; j++) {
+			imageData[i][j] = calcCell(offsetX, offsetY);
 			offsetX += cellWidth;
 		}
 		offsetY += cellWidth;
 	}
+	return imageData;
 }
 
 function rotateGradientVectors(phi) {
-	grid.forEach(row => row.forEach(element => element.rotate(element.angle() + phi)));
+	grid.forEach(row =>
+		row.forEach(element =>
+			element.rotate(element.angle() + phi)));
 }
 
-//const angle = 0.05;
-//function step() {
-//	rotateGradientVectors(angle);
-//	ctx.clearRect(0, 0, 900, 900);
-//	render();
-//	window.requestAnimationFrame(step);
-//}
-
 randomizeGradientVectors(grid, gridSize);
-render();
-//requestAnimationFrame(step);
+const imageData = perlin();
+
+let y = 0;
+let xOffset = 0;
+for(let i = 0; i < imageData.length; i++){
+	const offsetY = cellWidth*i;
+	for(let j = 0; j < imageData[i].length; j++){
+		let y = offsetY;
+		const xOffset = cellWidth*j;
+		for(let k = 0; k < cellWidth; k++){
+			let x = xOffset;
+			for(let l = 0; l < cellWidth; l++){
+				const brightness = 255 * ((imageData[i][j][k * cellWidth + l] + 1) / 2);
+				ctx.fillStyle = `rgb(${brightness}, ${brightness}, ${brightness})`;
+				ctx.fillRect(x, y, 1, 1);
+				x++;
+			}
+			y++;
+		}
+	}
+}
