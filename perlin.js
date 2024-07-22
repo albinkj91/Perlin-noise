@@ -1,4 +1,4 @@
-const width = 600;
+const width = 500;
 const gridSize = 20;
 const cellWidth = Math.floor(width / gridSize);
 const grid = [];
