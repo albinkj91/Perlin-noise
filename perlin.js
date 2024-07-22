@@ -1,13 +1,7 @@
-const canvas = document.querySelector('#canvas');
-const ctx = canvas.getContext('2d');
-
-const width = 100;
-const gridSize = 10;
+const width = 600;
+const gridSize = 20;
 const cellWidth = Math.floor(width / gridSize);
 const grid = [];
-
-canvas.width = cellWidth * (gridSize-1);
-canvas.height = cellWidth * (gridSize-1);
 
 class Vector {
 	constructor(x, y) {
@@ -41,7 +35,7 @@ class Vector {
 	}
 }
 
-function randomizeGradientVectors(grid, size) {
+const randomizeGradientVectors = (grid, size) => {
 	for (let i = 0; i < size; i++) {
 		grid[i] = new Array();
 		for (let j = 0; j < size; j++) {
@@ -50,17 +44,17 @@ function randomizeGradientVectors(grid, size) {
 			grid[i][j].normalize();
 		}
 	}
-}
+};
 
-function smoothstep(x) {
+const smoothstep = (x) => {
 	return 3 * x * x - 2 * x * x * x;
-}
+};
 
-function lerp(a, b, t) {
+const lerp = (a, b, t) => {
 	return a + t * (b - a);
-}
+};
 
-function calcCell(offsetX, offsetY) {
+const calcCell = (offsetX, offsetY) => {
 	let cellData = new Float32Array(cellWidth*cellWidth);
 	for (let i = 0; i < cellWidth*cellWidth; i++) {
 		const x = i % cellWidth;
@@ -86,15 +80,13 @@ function calcCell(offsetX, offsetY) {
 		const cd = lerp(dot4, dot3, smoothstep(vector1.x));
 		const result = lerp(ab, cd, smoothstep(vector1.y));
 
-		//const brightness = result * 255;
-		//ctx.fillStyle = `rgb(${brightness}, ${brightness}, ${brightness})`;
-		//ctx.fillRect(offsetX + x, offsetY + y, 1, 1)
 		cellData[i] = result;
 	}
 	return cellData;
-}
+};
 
-function perlin() {
+export const perlin = () => {
+	randomizeGradientVectors(grid, gridSize);
 	let imageData = [];
 	let offsetY = 0;
 	for (let i = 0; i < gridSize - 1; i++) {
@@ -106,34 +98,29 @@ function perlin() {
 		}
 		offsetY += cellWidth;
 	}
-	return imageData;
-}
+	return as2D(imageData);
+};
 
-function rotateGradientVectors(phi) {
+const rotateGradientVectors = (phi) => {
 	grid.forEach(row =>
 		row.forEach(element =>
 			element.rotate(element.angle() + phi)));
-}
+};
 
-randomizeGradientVectors(grid, gridSize);
-const imageData = perlin();
 
-let y = 0;
-let xOffset = 0;
-for(let i = 0; i < imageData.length; i++){
-	const offsetY = cellWidth*i;
-	for(let j = 0; j < imageData[i].length; j++){
-		let y = offsetY;
-		const xOffset = cellWidth*j;
-		for(let k = 0; k < cellWidth; k++){
-			let x = xOffset;
-			for(let l = 0; l < cellWidth; l++){
-				const brightness = 255 * ((imageData[i][j][k * cellWidth + l] + 1) / 2);
-				ctx.fillStyle = `rgb(${brightness}, ${brightness}, ${brightness})`;
-				ctx.fillRect(x, y, 1, 1);
-				x++;
+const as2D = (imageData) => {
+	let perlinData = []
+
+	for(let gridY = 0; gridY < imageData.length; gridY++){
+		for(let cellY = 0; cellY < cellWidth; cellY++){
+			perlinData[cellY + gridY * cellWidth] = new Array();
+			for(let gridX = 0; gridX < imageData[gridY].length; gridX++){
+				for(let cellX = 0; cellX < cellWidth; cellX++){
+					const brightness = (imageData[gridY][gridX][cellY * cellWidth + cellX] + 1) / 2.0;
+					perlinData[cellY + gridY * cellWidth][gridX * cellWidth + cellX] = brightness;
+				}
 			}
-			y++;
 		}
 	}
-}
+	return perlinData;
+};

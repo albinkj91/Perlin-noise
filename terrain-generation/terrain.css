@@ -1,11 +1,10 @@
 body {
 	background-color: #202020;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 }
 
 #content {
-	display: flex;
-	width: 1200;
-	height: 800;
-	align-items: center;
-	justify-content: center;
+	width: fit-content;
 }
