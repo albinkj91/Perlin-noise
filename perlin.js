@@ -36,9 +36,9 @@ class Vector {
 }
 
 const randomizeGradientVectors = (grid, size) => {
-	for (let i = 0; i < size; i++) {
+	for (let i = 0; i <= size; i++) {
 		grid[i] = new Array();
-		for (let j = 0; j < size; j++) {
+		for (let j = 0; j <= size; j++) {
 			grid[i][j] = new Vector(1, 1);
 			grid[i][j].rotate(Math.random() * 2 * Math.PI);
 			grid[i][j].normalize();
@@ -89,10 +89,10 @@ export const perlin = () => {
 	randomizeGradientVectors(grid, gridSize);
 	let imageData = [];
 	let offsetY = 0;
-	for (let i = 0; i < gridSize - 1; i++) {
+	for (let i = 0; i < gridSize; i++) {
 		let offsetX = 0;
 		imageData[i] = new Array();
-		for (let j = 0; j < gridSize - 1; j++) {
+		for (let j = 0; j < gridSize; j++) {
 			imageData[i][j] = calcCell(offsetX, offsetY);
 			offsetX += cellWidth;
 		}

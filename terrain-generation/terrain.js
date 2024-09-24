@@ -71,6 +71,7 @@ const main = () => {
 	};
 
 	const perlinData = perlin();
+	
 	const terrain = generateTerrain(perlinData);
 
 	// Here's where we call the routine that builds all the
